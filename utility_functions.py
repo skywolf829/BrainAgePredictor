@@ -74,10 +74,9 @@ def loadCSV(filename):
 
     return headers, features, features_1, features_2, features_3, features_all, ages, ages_1, ages_2, ages_3, ages_all
 
-def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientToFeatures={}):
-    patientToGroup = {}
-    patientToAge = {}
-    headers = []
+def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientToFeatures={}, headers=[]):
+    currentHeaders = []
+    special = ["superiorfrontal", "GCC", "parsopercularis", "medialorbitofrontal","Thalamus", "superiortemporal","rostralanteriorcingulate","CC", "BCC", "Left-Accumbens-area", "FX", "caudalmiddlefrontal", "insula", "supramarginal", "frontalpole", "rostralmiddlefrontal", "parstriangularis", "bankssts", "CR", "lateralorbitofrontal"]
     with open(filename) as file:
         csvFile = csv.reader(file)
         r = 0
@@ -86,8 +85,10 @@ def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientT
             patientData = []        
             for item in row:
                 if r == 0:
-                    if item != None and item != "" and item != " " and c >= 5:
-                        headers.append(item)
+                    if item != None and item != "" and item != " ":
+                        currentHeaders.append(item)
+                        if c >= 4:
+                            headers.append(item)
                 else:
                     if item != None and item != "" and item != " ":
                         if c == 0 and not row[0] in patientToFeatures:
@@ -103,7 +104,7 @@ def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientT
             if len(patientData) > 0 and r != 0:
                 patientToFeatures[row[0]] = np.ndarray.tolist(np.concatenate((patientToFeatures[row[0]], patientData), axis=0))
             r = r + 1 
-    return patientToGroup, patientToAge, patientToFeatures
+    return patientToGroup, patientToAge, patientToFeatures, headers
 
 def getAgesAndFeaturesForGroups(patientGroups, patientAges, patientFeatures, groups):
     patientIDs = []
