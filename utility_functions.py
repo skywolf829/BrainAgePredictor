@@ -159,6 +159,15 @@ def calcAverageDiff(arr1, arr2):
     diff = diff / len(arr1)
     return diff
 
+def calcAbsAverageDiff(arr1, arr2):
+    diff = 0
+    i = 0
+    while i < len(arr1):
+        diff = diff + abs(arr1[i] - arr2[i])
+        i = i + 1
+    diff = diff / len(arr1)
+    return diff
+
 def printWithLines(arr):
     for item in arr:
         print(item)
