@@ -77,6 +77,7 @@ def loadCSV(filename):
 def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientToFeatures={}, headers=[]):
     currentHeaders = []
     special = ["superiorfrontal", "GCC", "parsopercularis", "medialorbitofrontal","Thalamus", "superiortemporal","rostralanteriorcingulate","CC", "BCC", "Left-Accumbens-area", "FX", "caudalmiddlefrontal", "insula", "supramarginal", "frontalpole", "rostralmiddlefrontal", "parstriangularis", "bankssts", "CR", "lateralorbitofrontal"]
+    
     with open(filename) as file:
         csvFile = csv.reader(file)
         r = 0

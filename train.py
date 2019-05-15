@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import utility_functions
 from sklearn.base import clone
+import pandas
+
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('PeripheralMeasuresBlood.csv')
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('PeripheralMeasuresBody.csv', patientToGroup, patientToAge, patientToFeatures, headers)
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('PeripheralMeasuresCombined.csv')
 
 patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('cortical_data.csv')
 patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('subcortical_data.csv', patientToGroup, patientToAge, patientToFeatures, headers)
@@ -38,34 +43,19 @@ IDs_all, groups_all, ages_all, features_all = utility_functions.getAgesAndFeatur
 #ages_all = np.concatenate(ages_all[0], utility_functions.loadCSV('subcorticalData.csv')[10], utility_functions.loadCSV('DTIdata.csv')[10])
 
 # REGRESSORS
-#classifier = svm.SVR(kernel='rbf', C=15, gamma="scale")
 #classifier = LinearRegression()
-#classifier = svm.SVR(kernel='linear', C=.0000001, gamma='scale')
-#classifier = svm.SVR(kernel='poly', C=50, gamma='scale', degree=4, coef0=1, epsilon=1)
+#classifier = svm.SVR(kernel='rbf', C=15, gamma="scale")
+#classifier = svm.SVR(kernel='linear', C=100, gamma='scale')
 #classifier = MLPRegressor(hidden_layer_sizes=(25), solver="adam", activation='logistic', tol=0.00001, alpha=0.0001, max_iter=1000000)
 #classifier = DecisionTreeRegressor()
 #classifier = GridSearchCV(svm.SVR(), params, cv=5)
 #classifier = RandomizedSearchCV(svm.SVR(), params, cv = 5, n_iter=1000, n_jobs=-1)
-#classifier = linear_model.LinearRegression()
 #classifier = linear_model.RidgeCV(alphas=np.logspace(-6, 6, 13))
 #classifier = linear_model.Lasso(alpha=0.1, max_iter=1000)
 #classifier = linear_model.ElasticNetCV()
-#classifier = linear_model.LarsCV()
 classifier = linear_model.BayesianRidge()
 #classifier = linear_model.SGDRegressor(max_iter=10000)
-#classifier = linear_model.Perceptron(max_iter=10000)
-#classifier = linear_model.HuberRegressor(max_iter=10000)
-#classifier = make_pipeline(PolynomialFeatures(5), Ridge())
-#classifier = PolynomialFeatures(2)
-
-# CLASSIFIERS
-#classifier = svm.SVC(kernel='rbf', C=10, gamma="scale")
-#classifier = DecisionTreeClassifier()
-#classifier = GaussianNB()
-#classifier = BernoulliNB()
-#classifier = KNeighborsClassifier()
-#classifier = NearestCentroid()
-#classifier = RandomizedSearchCV(svm.SVC(), params, cv=3, n_iter=100, n_jobs=-1)
+#classifier = make_pipeline(PolynomialFeatures(2), Ridge())
 
 
 params = {'C': stats.expon(scale=10), 'gamma': ["scale"], 'coef0':[0,1,10], 'kernel': ['sigmoid']}
@@ -74,21 +64,21 @@ iterations = 100
 random_state = 12883823
 
 sc_X = StandardScaler()
-sc_X.fit(features)
+sc_X.fit(features_all)
 
 features = sc_X.transform(features)
-#features1 = sc_X.transform(features1)
-#features2 = sc_X.transform(features2)
-#features3 = sc_X.transform(features3)
-#features_all = sc_X.transform(features_all)
-features, ages = shuffle(features, ages)
+features1 = sc_X.transform(features1)
+features2 = sc_X.transform(features2)
+features3 = sc_X.transform(features3)
+features_all = sc_X.transform(features_all)
+features_all, ages_all = shuffle(features_all, ages_all, random_state=random_state)
 
-features = np.array(features)
-ages = np.array(ages)
-X_CV = np.array(features)
-X_validation = np.array(features)
-y_CV = np.array(ages)
-y_validation = np.array(ages)
+features_all = np.array(features_all)
+ages_all = np.array(ages_all)
+X_CV = features_all
+X_validation = features_all
+y_CV = ages_all
+y_validation = ages_all
 #X_CV, X_validation, y_CV, y_validation = train_test_split(features, ages, test_size=0.0, random_state=42)
 #y_CV = np.array(y_CV)
 #classifier.fit(X_train, y_train)
@@ -98,6 +88,19 @@ y_validation = np.array(ages)
 #ages = np.array(ages)
 #y_pred = cross_val_predict(classifier, features, ages, cv=kFolds)
 
+
+data = pandas.DataFrame(data=features, columns=headers)
+correlations = data.corr()
+fig = plt.figure()
+ax = fig.add_subplot(111)
+cax = ax.matshow(correlations, vmin=-1, vmax=1)
+fig.colorbar(cax)
+ticks = np.arange(0,67,1)
+ax.set_xticks(ticks)
+ax.set_yticks(ticks)
+ax.set_xticklabels(headers, rotation=90)
+ax.set_yticklabels(headers)
+plt.show()
 
 #for currentVar in range(0,len(features[0]-1)):
 i = 0
@@ -109,7 +112,6 @@ rkf = RepeatedKFold(n_splits=kFolds, n_repeats=iterations, random_state=random_s
 #X_CV = features[:,currentVar]
 #X_CV = np.reshape(X_CV, (-1, 1))
 for train_index, test_index in rkf.split(X_CV):
-    #print("TRAIN:", train_index, "TEST:", test_index)
     X_train, X_test = X_CV[train_index], X_CV[test_index]
     y_train, y_test = y_CV[train_index], y_CV[test_index]
     classifier.fit(X_train, y_train)
@@ -129,9 +131,8 @@ for train_index, test_index in rkf.split(X_CV):
 averageScore = averageScore / i
 
 print("Average score: " + str(averageScore))
-#print("Best score: " + str(bestScore))
-bestClassifier.fit(X_validation, y_validation)
-validationScore = bestClassifier.score(X_validation, y_validation)
+classifier.fit(X_validation, y_validation)
+validationScore = classifier.score(X_validation, y_validation)
 print("Validation score: " + str(validationScore))
 y_pred = classifier.predict(X_validation)
 print("Average difference: " + str(utility_functions.calcAverageDiff(y_pred, y_validation)))
@@ -139,8 +140,8 @@ print("Average absolute difference: " + str(utility_functions.calcAbsAverageDiff
 
 fig, ax = plt.subplots()
 ax.scatter(y_validation, y_pred, edgecolors=(0, 0, 0))
-ax.plot([ages.min(), ages.max()], [ages.min(), ages.max()], 'k--', lw=2)
-ax.set_title('Predicted vs Actual Age')
+ax.plot([ages_all.min(), ages_all.max()], [ages_all.min(), ages_all.max()], 'k--', lw=2)
+ax.set_title('Predicted vs Actual Age\nR^2='+str(validationScore))
 ax.set_xlabel('Actual Age')
 ax.set_ylabel('Predicted Age')
 plt.show()
