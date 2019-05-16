@@ -25,13 +25,13 @@ import utility_functions
 from sklearn.base import clone
 import pandas
 
-#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_Body.csv')
-#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_Blood.csv', patientToGroup, patientToAge, patientToFeatures, headers)
-#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_NewVars.csv')
+patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_Body.csv')
+patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_Blood.csv', patientToGroup, patientToAge, patientToFeatures, headers)
+patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_NewVars.csv')
 
-patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('cortical_data.csv')
-patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('subcortical_data.csv', patientToGroup, patientToAge, patientToFeatures, headers)
-patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('DTI_data.csv', patientToGroup, patientToAge, patientToFeatures, headers)
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('cortical_data.csv')
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('subcortical_data.csv', patientToGroup, patientToAge, patientToFeatures, headers)
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('DTI_data.csv', patientToGroup, patientToAge, patientToFeatures, headers)
 
 IDs, groups, ages, features = utility_functions.getAgesAndFeaturesForGroups(patientToGroup, patientToAge, patientToFeatures, [0])
 IDs1, groups1, ages1, features1 = utility_functions.getAgesAndFeaturesForGroups(patientToGroup, patientToAge, patientToFeatures, [1])
@@ -45,7 +45,7 @@ IDs_all, groups_all, ages_all, features_all = utility_functions.getAgesAndFeatur
 
 # REGRESSORS
 #classifier = LinearRegression()
-#classifier = svm.SVR(kernel='rbf', C=20, gamma="scale")
+classifier = svm.SVR(kernel='rbf', C=10, gamma="scale")
 #classifier = svm.SVR(kernel='linear', C=10, gamma='scale')
 #classifier = MLPRegressor(hidden_layer_sizes=(25), solver="adam", activation='logistic', tol=0.00001, alpha=0.0001, max_iter=1000000)
 #classifier = DecisionTreeRegressor()
@@ -55,7 +55,7 @@ IDs_all, groups_all, ages_all, features_all = utility_functions.getAgesAndFeatur
 #classifier = linear_model.Lasso(alpha=0.1, max_iter=1000)
 #classifier = linear_model.ElasticNetCV()
 #classifier = linear_model.BayesianRidge()
-classifier = linear_model.SGDRegressor(max_iter=10000)
+#classifier = linear_model.SGDRegressor(max_iter=10000)
 #classifier = make_pipeline(PolynomialFeatures(2), Ridge())
 
 
@@ -75,11 +75,13 @@ features_all = sc_X.transform(features_all)
 features_all, ages_all = shuffle(features_all, ages_all, random_state=random_state)
 
 features = np.array(features)
+features_all = np.array(features_all)
 ages = np.array(ages)
-X_CV = features
-X_validation = features
-y_CV = ages
-y_validation = ages
+ages_all = np.array(ages_all)
+X_CV = features_all
+X_validation = features_all
+y_CV = ages_all
+y_validation = ages_all
 #X_CV, X_validation, y_CV, y_validation = train_test_split(features, ages, test_size=0.0, random_state=42)
 #y_CV = np.array(y_CV)
 #classifier.fit(X_train, y_train)
@@ -146,6 +148,7 @@ ax.set_xlabel('Actual Age')
 ax.set_ylabel('Predicted Age')
 plt.show()
 
+
 #scores = cross_val_score(classifier, X_train, y_train, cv=kFolds)
 #print("CV scores: " + str(scores))
 #print("Average score: " + str(np.array(scores).mean()))
@@ -163,4 +166,10 @@ plt.show()
 #print("Avg age diff on group 2: " + str(utility_functions.calcAverageDiff(y_pred2, ages2)))
 #print("Avg age diff on group 3: " + str(utility_functions.calcAverageDiff(y_pred3, ages3)))
 
-#utility_functions.printWithLines(y_predAll - ages_all)
+#utility_functions.printWithLines(IDs_all)
+#print('break')
+#utility_functions.printWithLines(groups_all)
+#print('break')
+#utility_functions.printWithLines(ages_all)
+#print('break')
+#utility_functions.printWithLines(y_pred)
