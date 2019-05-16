@@ -19,14 +19,15 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from scipy import stats
 import utility_functions
 from sklearn.base import clone
 import pandas
 
-#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('PeripheralMeasuresBlood.csv')
-#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('PeripheralMeasuresBody.csv', patientToGroup, patientToAge, patientToFeatures, headers)
-#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('PeripheralMeasuresCombined.csv')
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_Body.csv')
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_Blood.csv', patientToGroup, patientToAge, patientToFeatures, headers)
+#patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('BodyBloodAge_NewVars.csv')
 
 patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('cortical_data.csv')
 patientToGroup, patientToAge, patientToFeatures, headers = utility_functions.loadCSVDictionary('subcortical_data.csv', patientToGroup, patientToAge, patientToFeatures, headers)
@@ -44,8 +45,8 @@ IDs_all, groups_all, ages_all, features_all = utility_functions.getAgesAndFeatur
 
 # REGRESSORS
 #classifier = LinearRegression()
-#classifier = svm.SVR(kernel='rbf', C=15, gamma="scale")
-#classifier = svm.SVR(kernel='linear', C=100, gamma='scale')
+#classifier = svm.SVR(kernel='rbf', C=20, gamma="scale")
+#classifier = svm.SVR(kernel='linear', C=10, gamma='scale')
 #classifier = MLPRegressor(hidden_layer_sizes=(25), solver="adam", activation='logistic', tol=0.00001, alpha=0.0001, max_iter=1000000)
 #classifier = DecisionTreeRegressor()
 #classifier = GridSearchCV(svm.SVR(), params, cv=5)
@@ -53,8 +54,8 @@ IDs_all, groups_all, ages_all, features_all = utility_functions.getAgesAndFeatur
 #classifier = linear_model.RidgeCV(alphas=np.logspace(-6, 6, 13))
 #classifier = linear_model.Lasso(alpha=0.1, max_iter=1000)
 #classifier = linear_model.ElasticNetCV()
-classifier = linear_model.BayesianRidge()
-#classifier = linear_model.SGDRegressor(max_iter=10000)
+#classifier = linear_model.BayesianRidge()
+classifier = linear_model.SGDRegressor(max_iter=10000)
 #classifier = make_pipeline(PolynomialFeatures(2), Ridge())
 
 
@@ -64,8 +65,8 @@ iterations = 100
 random_state = 12883823
 
 sc_X = StandardScaler()
-sc_X.fit(features_all)
-
+#sc_X = PCA()
+sc_X.fit(features)
 features = sc_X.transform(features)
 features1 = sc_X.transform(features1)
 features2 = sc_X.transform(features2)
@@ -73,12 +74,12 @@ features3 = sc_X.transform(features3)
 features_all = sc_X.transform(features_all)
 features_all, ages_all = shuffle(features_all, ages_all, random_state=random_state)
 
-features_all = np.array(features_all)
-ages_all = np.array(ages_all)
-X_CV = features_all
-X_validation = features_all
-y_CV = ages_all
-y_validation = ages_all
+features = np.array(features)
+ages = np.array(ages)
+X_CV = features
+X_validation = features
+y_CV = ages
+y_validation = ages
 #X_CV, X_validation, y_CV, y_validation = train_test_split(features, ages, test_size=0.0, random_state=42)
 #y_CV = np.array(y_CV)
 #classifier.fit(X_train, y_train)
@@ -88,19 +89,18 @@ y_validation = ages_all
 #ages = np.array(ages)
 #y_pred = cross_val_predict(classifier, features, ages, cv=kFolds)
 
-
 data = pandas.DataFrame(data=features, columns=headers)
 correlations = data.corr()
 fig = plt.figure()
 ax = fig.add_subplot(111)
-cax = ax.matshow(correlations, vmin=-1, vmax=1)
+cax = ax.matshow(correlations, cmap=cm.get_cmap("coolwarm"), vmin=-1, vmax=1)
 fig.colorbar(cax)
-ticks = np.arange(0,67,1)
+ticks = np.arange(0,len(headers),1)
 ax.set_xticks(ticks)
 ax.set_yticks(ticks)
 ax.set_xticklabels(headers, rotation=90)
 ax.set_yticklabels(headers)
-plt.show()
+#plt.show()
 
 #for currentVar in range(0,len(features[0]-1)):
 i = 0
@@ -140,7 +140,7 @@ print("Average absolute difference: " + str(utility_functions.calcAbsAverageDiff
 
 fig, ax = plt.subplots()
 ax.scatter(y_validation, y_pred, edgecolors=(0, 0, 0))
-ax.plot([ages_all.min(), ages_all.max()], [ages_all.min(), ages_all.max()], 'k--', lw=2)
+ax.plot([ages.min(), ages.max()], [ages.min(), ages.max()], 'k--', lw=2)
 ax.set_title('Predicted vs Actual Age\nR^2='+str(validationScore))
 ax.set_xlabel('Actual Age')
 ax.set_ylabel('Predicted Age')

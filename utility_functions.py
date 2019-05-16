@@ -77,7 +77,8 @@ def loadCSV(filename):
 def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientToFeatures={}, headers=[]):
     currentHeaders = []
     special = ["superiorfrontal", "GCC", "parsopercularis", "medialorbitofrontal","Thalamus", "superiortemporal","rostralanteriorcingulate","CC", "BCC", "Left-Accumbens-area", "FX", "caudalmiddlefrontal", "insula", "supramarginal", "frontalpole", "rostralmiddlefrontal", "parstriangularis", "bankssts", "CR", "lateralorbitofrontal"]
-    
+    toIgnore = ["CC", "inferiorparietal", "CR", "IC", "caudalmiddlefrontal", "inferiortemporal", "middletemportal", "superiorfrontal", "superiormarginal", "middletemportal"]
+    acceptedCs = []
     with open(filename) as file:
         csvFile = csv.reader(file)
         r = 0
@@ -86,10 +87,10 @@ def loadCSVDictionary(filename, patientToGroup = {}, patientToAge = {}, patientT
             patientData = []        
             for item in row:
                 if r == 0:
-                    if item != None and item != "" and item != " ":
+                    if item != None and item != "" and item != " " and c >=4:                        
                         currentHeaders.append(item)
-                        if c >= 4:
-                            headers.append(item)
+                        headers.append(item)
+                        acceptedCs.append(c)
                 else:
                     if item != None and item != "" and item != " ":
                         if c == 0 and not row[0] in patientToFeatures:
