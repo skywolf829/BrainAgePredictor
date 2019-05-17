@@ -3,14 +3,18 @@
 ## Installation
 This work uses Python 3.6.8 (64-bit) with packages numpy, sklearn, pandas, scipy, csv, and matplotlib. Ensure python is downloaded, then install the packages with
 
-'''pip install PACKAGE_NAME'''
+'''
+$ pip install PACKAGE_NAME
+'''
 
 from the command line. Ensure the Python executable has been added to your system's PATH variable.
 
 ## Running the code
 Run the code from the command line with
 
-''' python train.py '''
+'''
+$ python train.py
+'''
 
 Alternatively, the code can be ran within an IDE, such as Visual Studio Code.
 
